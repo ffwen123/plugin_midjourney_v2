@@ -1,0 +1,23 @@
+{
+  "api_url": "代理Midjourney API URL",
+  "call_back_url": "回调URL，查看任务ID详情及结果：http://ip:8080/mj/task/{id}/fetch",
+  "submit_uv": "放大 或 变换URL",
+  "point_uv": "画 /variation {任务ID} + 放大 U1～U4 或 变换 V1～V4",
+  "oss_conf": {
+    "akid": "AccessKey ID",
+    "akst": "AccessKey Secret",
+    "aked": "https://oss-cn-hangzhou.aliyuncs.com",
+    "image_url": "oss的连接{}",
+    "image_addre": "oss的图片文件夹，可以设置有效期",
+    "bucket_name": "bucket_name"
+  },
+  "defaults": {
+    "action": "IMAGINE:出图",
+    "prompt": "你的prompt"
+  },
+  "button_data": "重新生成触发词：/variation",
+  "rule": {
+    "image": "触发图生图关键词"
+  }
+}
+
