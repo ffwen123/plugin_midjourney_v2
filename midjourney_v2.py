@@ -233,8 +233,7 @@ class MidjourneyV2(Plugin):
             api_data = requests.post(url=url, json=data, timeout=30.05)
         if api_data.status_code == 200:
             # 调用回调的URL
-            messageId = api_data.json().get("result") if "result" in api_data.json().keys() else api_data.json().get(
-                "id", "")
+            messageId = api_data.json().get("result")
             logger.info("[RP] api_data={}".format(api_data.text))
             if api_data.status_code == 200:
                 if api_data.json().get("code", 0) == 2:
