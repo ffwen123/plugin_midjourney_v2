@@ -240,6 +240,7 @@ class MidjourneyV2(Plugin):
                     time.sleep(20)
                 get_resp = requests.get(url=self.call_back_url.format(messageId), timeout=30.05)
                 out_time = time.time()
+                logger.info("[RP] get_resp={}".format(get_resp.text))
                 # Webhook URL的响应慢，没隔 5 秒获取一次，超过600秒判断没有结果
                 if get_resp.status_code == 200:
                     while get_resp.status_code == 200:
