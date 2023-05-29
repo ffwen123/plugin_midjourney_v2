@@ -97,14 +97,14 @@ class MidjourneyV2(Plugin):
                         flag = True
                         prompt = prompt.replace(self.rule.get("image"), "")
                     if self.button_data in prompt:
-                        submit_uv = prompt.replace(self.button_data, "").strip().split(" ")
+                        submit_uv = prompt.replace(self.button_data, "").strip().split()
                         logger.info("[RP] submit_uv post_json={}".format(str(submit_uv)))
-                        if submit_uv[1] in ["U1", "U2", "U3", "U4", "V1", "V2", "V3", "V4"]:
+                        if submit_uv[-1] in ["U1", "U2", "U3", "U4", "V1", "V2", "V3", "V4"]:
                             http_resp, messageId = self.get_imageurl(url=self.submit_uv,
                                                                      data={"content": " ".join(submit_uv)})
                             if messageId:
                                 if http_resp.get("imageUrl"):
-                                    if submit_uv[1] in ["V1", "V2", "V3", "V4"]:
+                                    if submit_uv[-1] in ["V1", "V2", "V3", "V4"]:
                                         try:
                                             com_reply = Reply()
                                             com_reply.type = ReplyType.IMAGE_URL
