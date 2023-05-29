@@ -227,10 +227,10 @@ class MidjourneyV2(Plugin):
         return help_text
 
     def get_imageurl(self, url, data):
-        api_data = requests.post(url=url, json=data, timeout=30.05)
+        api_data = requests.post(url=url, json=data, timeout=120.05)
         if api_data.status_code != 200:
             time.sleep(2)
-            api_data = requests.post(url=url, json=data, timeout=30.05)
+            api_data = requests.post(url=url, json=data, timeout=120.05)
         if api_data.status_code == 200:
             # 调用回调的URL
             messageId = api_data.json().get("result")
@@ -239,7 +239,7 @@ class MidjourneyV2(Plugin):
                 if api_data.json().get("code", 0) == 2:
                     time.sleep(20)
                 time.sleep(5)
-                get_resp = requests.get(url=self.call_back_url.format(messageId), timeout=30.05)
+                get_resp = requests.get(url=self.call_back_url.format(messageId), timeout=120.05)
                 if not get_resp:
                     return "已失效", None
                 out_time = time.time()
@@ -252,12 +252,12 @@ class MidjourneyV2(Plugin):
                             if time.time() - out_time > 600:
                                 break
                             time.sleep(5)
-                            get_resp = requests.get(url=self.call_back_url.format(messageId), timeout=30.05)
+                            get_resp = requests.get(url=self.call_back_url.format(messageId), timeout=120.05)
                         elif _resp.get("status") == "NOT_START":
                             if time.time() - out_time > 600:
                                 break
                             time.sleep(20)
-                            get_resp = requests.get(url=self.call_back_url.format(messageId), timeout=30.05)
+                            get_resp = requests.get(url=self.call_back_url.format(messageId), timeout=120.05)
                         else:
                             break
                     logger.info("[RP] get_imageUrl={}".format(get_resp.text))
