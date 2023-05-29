@@ -240,7 +240,7 @@ class MidjourneyV2(Plugin):
                     time.sleep(20)
                 time.sleep(5)
                 get_resp = requests.get(url=self.call_back_url.format(messageId), timeout=120.05)
-                if not get_resp:
+                if not get_resp.text:
                     return "已失效", None
                 out_time = time.time()
                 logger.info("[RP] get_resp={}".format(get_resp.text))
