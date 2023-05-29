@@ -28,6 +28,8 @@ comapp = WechatComAppChannel()
 
 def is_chinese(prompt):
     for char in prompt:
+        if char in [r"\r", r"\t", r"\n"]:
+            continue
         if "CJK" in unicodedata.name(char):
             return True
     return False
