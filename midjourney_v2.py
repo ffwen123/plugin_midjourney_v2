@@ -238,6 +238,7 @@ class MidjourneyV2(Plugin):
             if api_data.status_code == 200:
                 if api_data.json().get("code", 0) == 2:
                     time.sleep(20)
+                time.sleep(5)
                 get_resp = requests.get(url=self.call_back_url.format(messageId), timeout=30.05)
                 out_time = time.time()
                 logger.info("[RP] get_resp={}".format(get_resp.text))
