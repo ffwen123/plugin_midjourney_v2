@@ -240,6 +240,8 @@ class MidjourneyV2(Plugin):
                     time.sleep(20)
                 time.sleep(5)
                 get_resp = requests.get(url=self.call_back_url.format(messageId), timeout=30.05)
+                if not get_resp:
+                    return "已失效", None
                 out_time = time.time()
                 logger.info("[RP] get_resp={}".format(get_resp.text))
                 # Webhook URL的响应慢，没隔 5 秒获取一次，超过600秒判断没有结果
