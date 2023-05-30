@@ -113,7 +113,6 @@ class MidjourneyV2(Plugin):
                                             com_reply.content = http_resp.get("imageUrl")
                                             comapp.send(com_reply, e_context['context'])
                                         except Exception as e:
-                                            print("测试2 UV")
                                             print(e)
                                         reply.type = ReplyType.TEXT
                                         reply.content = self.point_uv.format(messageId)
@@ -147,7 +146,7 @@ class MidjourneyV2(Plugin):
                             reply.type = ReplyType.INFO
                             reply.content = "请发送一张图片给我"
                         else:
-                            logger.info("[RP] txt2img post_json={}".format(params))
+                            logger.info("[RP] txt2img params={}".format(params))
                             # 调用midjourneyv2 api来画图
                             http_resp, messageId = self.get_imageurl(url=self.api_url, data=params)
                             if messageId:
@@ -158,7 +157,6 @@ class MidjourneyV2(Plugin):
                                         com_reply.content = http_resp.get("imageUrl")
                                         comapp.send(com_reply, e_context['context'])
                                     except Exception as e:
-                                        print("测试1")
                                         print(e)
                                     reply.type = ReplyType.TEXT
                                     reply.content = self.point_uv.format(messageId)
@@ -175,7 +173,7 @@ class MidjourneyV2(Plugin):
             else:
                 cmsg = e_context['context']['msg']
                 if user_id in self.params_cache:
-                    params = self.params_cache[user_id]
+                    img_params = self.params_cache[user_id]
                     del self.params_cache[user_id]
                     cmsg.prepare()
                     img_data = open(content, "rb")
@@ -184,17 +182,21 @@ class MidjourneyV2(Plugin):
                     filename = f"{rand_str}_{num_str}" + ".png"
                     oss_imgurl = self.put_oss_image(filename, img_data)
                     if oss_imgurl:
-                        post_json = {**self.default_params, **{
-                            "cmd": self.slash_commands_data.get("cmd", "imagine"),
-                            "msg": f'''"cmd":"{oss_imgurl} {params["prompt"]}"'''
-                        }}
-                        logger.info("[RP] img2img post_json={}".format(post_json))
+                        img_params.update({"prompt": f"{oss_imgurl} {img_params['prompt']}"})
+                        logger.info("[RP] img2img img_post={}".format(img_params))
                         # 调用midjourney api图生图
-                        http_resp, messageId = self.get_imageurl(url=self.api_url, data=post_json)
+                        http_resp, messageId = self.get_imageurl(url=self.api_url, data=img_params)
                         if messageId:
                             if http_resp.get("imageUrl"):
-                                reply.type = ReplyType.IMAGE_URL
-                                reply.content = http_resp.get("imageUrl")
+                                try:
+                                    com_reply = Reply()
+                                    com_reply.type = ReplyType.IMAGE_URL
+                                    com_reply.content = http_resp.get("imageUrl")
+                                    comapp.send(com_reply, e_context['context'])
+                                except Exception as e:
+                                    print(e)
+                                reply.type = ReplyType.TEXT
+                                reply.content = self.point_uv.format(messageId)
                             else:
                                 reply.type = ReplyType.ERROR
                                 reply.content = "图片imageUrl为空"
