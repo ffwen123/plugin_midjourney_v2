@@ -114,6 +114,7 @@ class MidjourneyV2(Plugin):
                                             comapp.send(com_reply, e_context['context'])
                                         except Exception as e:
                                             print(e)
+                                        time.sleep(2)
                                         reply.type = ReplyType.TEXT
                                         reply.content = self.point_uv.format(messageId)
                                     else:
@@ -158,6 +159,7 @@ class MidjourneyV2(Plugin):
                                         comapp.send(com_reply, e_context['context'])
                                     except Exception as e:
                                         print(e)
+                                    time.sleep(2)
                                     reply.type = ReplyType.TEXT
                                     reply.content = self.point_uv.format(messageId)
                                 else:
@@ -195,6 +197,7 @@ class MidjourneyV2(Plugin):
                                     comapp.send(com_reply, e_context['context'])
                                 except Exception as e:
                                     print(e)
+                                time.sleep(2)
                                 reply.type = ReplyType.TEXT
                                 reply.content = self.point_uv.format(messageId)
                             else:
