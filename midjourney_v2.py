@@ -182,7 +182,7 @@ class MidjourneyV2(Plugin):
                     filename = f"{rand_str}_{num_str}" + ".png"
                     oss_imgurl = self.put_oss_image(filename, img_data)
                     if oss_imgurl:
-                        img_params.update({"prompt": f"{oss_imgurl} {img_params['prompt']}"})
+                        img_params.update({"prompt": f'''"cmd":"{oss_imgurl} {img_params["prompt"]}"'''})
                         logger.info("[RP] img2img img_post={}".format(img_params))
                         # 调用midjourney api图生图
                         http_resp, messageId = self.get_imageurl(url=self.api_url, data=img_params)
