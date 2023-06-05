@@ -12,6 +12,7 @@ import string
 import time
 import unicodedata
 import requests
+import base64
 import oss2
 from bridge.context import ContextType
 from bridge.reply import Reply, ReplyType
@@ -178,41 +179,43 @@ class MidjourneyV2(Plugin):
                     img_params = self.params_cache[user_id]
                     del self.params_cache[user_id]
                     cmsg.prepare()
-                    img_data = open(content, "rb")
-                    rand_str = "".join(random.sample(string.ascii_letters + string.digits, 8))
-                    num_str = str(random.uniform(1, 10)).split(".")[-1]
-                    filename = f"{rand_str}_{num_str}" + ".png"
-                    oss_imgurl = self.put_oss_image(filename, img_data)
-                    if oss_imgurl:
-                        img_params.update({"prompt": f'''"cmd":"{oss_imgurl} {img_params["prompt"]}"'''})
-                        logger.info("[RP] img2img img_post={}".format(img_params))
-                        # 调用midjourney api图生图
-                        http_resp, messageId = self.get_imageurl(url=self.api_url, data=img_params)
-                        if messageId:
-                            if http_resp.get("imageUrl"):
-                                try:
-                                    com_reply = Reply()
-                                    com_reply.type = ReplyType.IMAGE_URL
-                                    com_reply.content = http_resp.get("imageUrl")
-                                    comapp.send(com_reply, e_context['context'])
-                                except Exception as e:
-                                    print(e)
-                                time.sleep(2)
-                                reply.type = ReplyType.TEXT
-                                reply.content = self.point_uv.format(messageId)
-                            else:
-                                reply.type = ReplyType.ERROR
-                                reply.content = "图片imageUrl为空"
+                    # img_data = open(content, "rb")
+                    img_data = base64.b64decode(open(content, "rb").read()).decode('utf-8')
+                    # rand_str = "".join(random.sample(string.ascii_letters + string.digits, 8))
+                    # num_str = str(random.uniform(1, 10)).split(".")[-1]
+                    # filename = f"{rand_str}_{num_str}" + ".png"
+                    # oss_imgurl = self.put_oss_image(filename, img_data)
+                    # if oss_imgurl:
+                    # img_params.update({"prompt": f'''"cmd":"{oss_imgurl} {img_params["prompt"]}"'''})
+                    img_params.update({"base64": f"data:image/png;base64,{img_data}", "prompt": img_params["prompt"]})
+                    logger.info("[RP] img2img img_post={}".format(img_params))
+                    # 调用midjourney api图生图
+                    http_resp, messageId = self.get_imageurl(url=self.api_url, data=img_params)
+                    if messageId:
+                        if http_resp.get("imageUrl"):
+                            try:
+                                com_reply = Reply()
+                                com_reply.type = ReplyType.IMAGE_URL
+                                com_reply.content = http_resp.get("imageUrl")
+                                comapp.send(com_reply, e_context['context'])
+                            except Exception as e:
+                                print(e)
+                            time.sleep(2)
+                            reply.type = ReplyType.TEXT
+                            reply.content = self.point_uv.format(messageId)
                         else:
                             reply.type = ReplyType.ERROR
-                            reply.content = http_resp
-                            e_context['reply'] = reply
-                            logger.error("[RP] Midjourney API api_data: %s " % http_resp)
+                            reply.content = "图片imageUrl为空"
                     else:
                         reply.type = ReplyType.ERROR
-                        reply.content = "oss上传图片失败"
+                        reply.content = http_resp
                         e_context['reply'] = reply
-                        logger.error("[RP] oss2 image result: oss上传图片失败")
+                        logger.error("[RP] Midjourney API api_data: %s " % http_resp)
+                    # else:
+                    #     reply.type = ReplyType.ERROR
+                    #     reply.content = "oss上传图片失败"
+                    #     e_context['reply'] = reply
+                    #     logger.error("[RP] oss2 image result: oss上传图片失败")
                     e_context['reply'] = reply
                     e_context.action = EventAction.BREAK_PASS  # 事件结束后，跳过处理context的默认逻辑
         except Exception as e:
@@ -243,7 +246,7 @@ class MidjourneyV2(Plugin):
             messageId = api_data.json().get("result")
             logger.info("[RP] api_data={}".format(api_data.text))
             if api_data.status_code == 200:
-                if api_data.json().get("code", 0) == 2:
+                if api_data.json().get("code", 0) != 1:
                     time.sleep(20)
                 time.sleep(10)
                 get_resp = requests.get(url=self.call_back_url.format(messageId), timeout=120.05)
@@ -261,7 +264,7 @@ class MidjourneyV2(Plugin):
                 if get_resp.status_code == 200:
                     while get_resp.status_code == 200:
                         _resp = get_resp.json()
-                        if _resp.get("status") == "IN_PROGRESS":
+                        if _resp.get("status") in ["IN_PROGRESS", "SUBMITTED"]:
                             if time.time() - out_time > 600:
                                 break
                             time.sleep(5)
@@ -281,7 +284,10 @@ class MidjourneyV2(Plugin):
                 else:
                     return "图片URL获取失败", None
         else:
-            return api_data.text, None
+            if "Request Entity Too Large" in api_data.content.decode("utf-8"):
+                return "上传图片太大", None
+            else:
+                return api_data.text, None
 
     def put_oss_image(self, data_name, img_bytes):
         try:
