@@ -180,7 +180,7 @@ class MidjourneyV2(Plugin):
                     del self.params_cache[user_id]
                     cmsg.prepare()
                     # img_data = open(content, "rb")
-                    img_data = base64.b64decode(open(content, "rb").read()).decode('utf-8')
+                    img_data = base64.b64encode(open(content, "rb").read()).decode('utf-8')
                     # rand_str = "".join(random.sample(string.ascii_letters + string.digits, 8))
                     # num_str = str(random.uniform(1, 10)).split(".")[-1]
                     # filename = f"{rand_str}_{num_str}" + ".png"
